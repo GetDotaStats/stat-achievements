@@ -8,37 +8,83 @@ GetDotaStats Stat-Achievements
 
 ## Client --> Server ##
 
-#### SAVE ####
+#### LIST ####
 |Field Name|Field DataType|Field Description
 |----------|--------------|-----------------
 |type      |String        |Always "SAVE", as that's this packet
 |modID     |String        |The modID allocated by GetDotaStats
 |steamID   |Long          |The SteamID of the owner of this save.
-|achievementID |Integer       |The unique ID for this achievement, as was set via the site.
-|achievedValue  |Integer          |The data for this achievement. Can be in the form of a tinyint(for bools) or an integer.
 
-#### LIST ####
-|Field Name|Field DataType|Field Description
-|----------|--------------|-----------------
-|type      |String        |Always "LIST", as that's this packet
-|modID     |String        |The modID allocated by GetDotaStats
-|steamID   |Long          |The SteamID of the owner of this save.
+#### SAVE ####
+|Field Name     |Field DataType  |Field Description
+|---------------|----------------|-----------------
+|type           |String          |Always "LIST", as that's this packet
+|modID          |String          |The modID allocated by GetDotaStats
+|steamID        |Long            |The SteamID of the owner of this save.
+|achievementID  |Integer         |The achievement that got progress
+|achievmentValue|AchievementValue|This will either be an integer or a boolean depending on the achievement
 
 ## Server --> Client ##
 
 #### success ####
+  - This is used for SAVE only
+
 |Field Name|Field DataType|Field Description
 |----------|--------------|-----------------
 |type      |String        |Always "success", as that's this packet
 
 #### failure ####
+- This is used for SAVE only
+
 |Field Name|Field DataType|Field Description
 |----------|--------------|-----------------
 |type      |String        |Always "failure", as that's this packet
 |error     |String        |A string describing the error. Only useful for debugging purposes
 
-#### list (10 most recent for now) ####
-|Field Name|Field DataType|Field Description
-|----------|--------------|-----------------
-|type      |String        |Always "list", as that's this packet
-|jsonData  |Array of JSON |Contains an array of all the achievement metadata.
+#### list ####
+|Field Name|Field DataType |Field Description
+|----------|---------------|-----------------
+|type      |String         |Always "list", as that's this packet
+|jsonData  |AchievementInfo|Contains an array of all the achievement metadata.
+
+## AchievementInfo
+This will be a JSON array of the following  
+
+|FieldName     |Field Datatype|Field Description
+|--------------|--------------|-----------------
+|hidden        |Boolean       |This will tell flash if this achievement should be shown in menus when locked
+|type          |String        |This defines what kind of achievement it is. As of 1.0, this will be "Count" or "Event"
+|--------------|--------------|---------------------------------------------------------------------------------------
+|event_acquired|Boolean       |Does the user have this achievement? (only appears for Event as of 1.0)
+|--------------|--------------|---------------------------------------------------------------------------------------
+|count_current |Integer       |How much progress does the user have (if complete, it will just be same as max)
+|count_max     |Integer       |What is the max progress of this achievement (used for rendering progress bars)
+
+As an example,  
+``` json
+[
+    {
+        "hidden" : false,
+        "type" : "Event",
+        "event_acquired" : true
+    },
+    {
+       "hidden" : true,
+        "type" : "Count",
+        "count_current" : 57,
+        "count_max" : 378
+    }
+]
+```
+In this example, it will have the following localization
+```
+"ACHIEVEMENT_0_NAME"        "F in Chemistry"
+"ACHIEVEMENT_0_DESCRIPTION" "On day 1 of the Rat job, blow up the lab."
+
+"ACHIEVEMENT_1_NAME"        "License to Kill"
+"ACHIEVEMENT_1_DESCRIPTION" "Kill 378 enemies using the Gruber Kurz handgun."
+```
+And for each achievement it'll have two images:  
+* `resource/flash3/images/achievements/0_on.png`
+* `resource/flash3/images/achievements/0_off.png`  
+where 0 is the achievement ID
