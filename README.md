@@ -11,17 +11,17 @@ GetDotaStats Stat-Achievements
 #### LIST ####
 |Field Name|Field DataType|Field Description
 |----------|--------------|-----------------
-|type      |String        |Always "SAVE", as that's this packet
+|type      |String        |Always "LIST", as that's this packet
 |modID     |String        |The modID allocated by GetDotaStats
 |steamID   |Long          |The SteamID of the owner of this save.
 
 #### SAVE ####
 |Field Name     |Field DataType  |Field Description
 |---------------|----------------|-----------------
-|type           |String          |Always "LIST", as that's this packet
+|type           |String          |Always "SAVE", as that's this packet
 |modID          |String          |The modID allocated by GetDotaStats
 |steamID        |Long            |The SteamID of the owner of this save.
-|achievementID  |Integer         |The achievement that got progress
+|achievementID  |String         |The achievement that got progress
 |achievmentValue|AchievementValue|This will either be an integer or a boolean depending on the achievement
 
 ## Server --> Client ##
@@ -52,11 +52,10 @@ This will be a JSON array of the following
 
 |FieldName     |Field Datatype|Field Description
 |--------------|--------------|-----------------
-|hidden        |Boolean       |This will tell flash if this achievement should be shown in menus when locked
+|achievementID  |Integer         |The achievement that got progress
+|hidden        |TinyInt (0,1)       |This will tell flash if this achievement should be shown in menus when locked
 |type          |String        |This defines what kind of achievement it is. As of 1.0, this will be "Count" or "Event"
-|--------------|--------------|---------------------------------------------------------------------------------------
-|event_acquired|Boolean       |Does the user have this achievement? (only appears for Event as of 1.0)
-|--------------|--------------|---------------------------------------------------------------------------------------
+|acquired |TinyInt (0,1)       |Does the user have this achievement? (only appears for Event as of 1.0)
 |count_current |Integer       |How much progress does the user have (if complete, it will just be same as max)
 |count_max     |Integer       |What is the max progress of this achievement (used for rendering progress bars)
 
@@ -64,15 +63,20 @@ As an example,
 ``` json
 [
     {
-        "hidden" : false,
+        "achievementID" : "e20926b2f31f41bc99878ff93f0c9787",
+        "hidden" : 0,
         "type" : "Event",
-        "event_acquired" : true
+        "count_current" : 1,
+        "count_max" : 1,
+        "acquired" : 1
     },
     {
-       "hidden" : true,
+        "achievementID" : "cd37af8d180d4a0da8c6e66bc6f2c73c",
+        "hidden" : 1,
         "type" : "Count",
         "count_current" : 57,
-        "count_max" : 378
+        "count_max" : 378,
+        "acquired" : 0
     }
 ]
 ```
