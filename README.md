@@ -21,8 +21,8 @@ GetDotaStats Stat-Achievements
 |type           |String          |Always "SAVE", as that's this packet
 |modID          |String          |The modID allocated by GetDotaStats
 |steamID        |Long            |The SteamID of the owner of this save.
-|achievementID  |String         |The achievement that got progress
-|achievmentValue|AchievementValue|This will either be an integer or a boolean depending on the achievement
+|achievementID  |Integer         |The achievement that got progress
+|achievmentValue|Integer |This will be the value of the achievement. (0,1) for booleans and the rest as integers.
 
 ## Server --> Client ##
 
@@ -63,7 +63,7 @@ As an example,
 ``` json
 [
     {
-        "achievementID" : "e20926b2f31f41bc99878ff93f0c9787",
+        "achievementID" : 0,
         "hidden" : 0,
         "type" : "Event",
         "count_current" : 1,
@@ -71,7 +71,7 @@ As an example,
         "acquired" : 1
     },
     {
-        "achievementID" : "cd37af8d180d4a0da8c6e66bc6f2c73c",
+        "achievementID" : 1,
         "hidden" : 1,
         "type" : "Count",
         "count_current" : 57,
