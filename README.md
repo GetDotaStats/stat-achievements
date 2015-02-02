@@ -13,7 +13,7 @@ GetDotaStats Stat-Achievements
 |----------|--------------|-----------------
 |type      |String        |Always "LIST", as that's this packet
 |modID     |String        |The modID allocated by GetDotaStats
-|steamID   |Long          |The SteamID of the owner of this save.
+|steamID   |Long          |The steamID of the owner of this save.
 
 #### SAVE ####
 |Field Name     |Field DataType  |Field Description
@@ -21,8 +21,8 @@ GetDotaStats Stat-Achievements
 |type           |String          |Always "SAVE", as that's this packet
 |modID          |String          |The modID allocated by GetDotaStats
 |steamID        |Long            |The SteamID of the owner of this save.
-|achievementID  |Integer         |The achievement that got progress
-|achievementValue|Integer |This will be the value of the achievement. (0,1) for booleans and the rest as integers.
+|achievementID  |Integer         |The achievement that got progress  (must be an integer of 1 or greater)
+|achievementValue|Integer        |This will be the value of the achievement. (0,1) for booleans and the rest as integers.
 
 ## Server --> Client ##
 
@@ -30,13 +30,16 @@ GetDotaStats Stat-Achievements
 
 |Field Name|Field DataType|Field Description
 |----------|--------------|-----------------
-|type      |String        |Either "success" or "failure"
-|error     |String        |A string describing the error. Only useful for debugging purposes
+|type      |String        |Always "save"
+|result    |String        |Either "success" or "failure"
+|error     |String        |An optional string describing the error. Only useful for debugging purposes
 
 #### list ####
 |Field Name|Field DataType |Field Description
 |----------|---------------|-----------------
-|type      |String         |Always "list", as that's this packet
+|type      |String         |Always "list"
+|result    |String         |Either "success" or "failure"
+|error     |String         |An optional string describing the error. Only useful for debugging purposes
 |jsonData  |AchievementInfo|Contains an array of all the achievement metadata.
 
 ## AchievementInfo
@@ -44,16 +47,12 @@ This will be a JSON array of the following
 
 |FieldName     |Field Datatype|Field Description
 |--------------|--------------|-----------------
-|achievementID  |Integer         |The achievement that got progress
+|achievementID  |Integer         |The achievement that got progress (must be an integer of 1 or greater)
 |achievementValue |Integer       |How much progress does the user have (if complete, it will be the same value as max)
 
 As an example,  
 ``` json
 [
-    {
-        "achievementID" : 0,
-        "achievementValue" : 1
-    },
     {
         "achievementID" : 1,
         "achievementValue" : 0
@@ -62,20 +61,27 @@ As an example,
         "achievementID" : 2,
         "achievementValue" : 9001
     }
+    {
+        "achievementID" : 3,
+        "achievementValue" : 1
+    }
 ]
 ```
 In this example, it will have the following localization
 ```
-"ACHIEVEMENT_0_NAME"        "F in Chemistry"
-"ACHIEVEMENT_0_DESCRIPTION" "On day 1 of the Rat job, blow up the lab."
+"ACHIEVEMENT_1_NAME"        "F in Chemistry"
+"ACHIEVEMENT_1_DESCRIPTION" "On day 1 of the Rat job, blow up the lab."
 
-"ACHIEVEMENT_1_NAME"        "License to Kill"
-"ACHIEVEMENT_1_DESCRIPTION" "Kill 378 enemies using the Gruber Kurz handgun."
+"ACHIEVEMENT_2_NAME"        "License to Kill"
+"ACHIEVEMENT_2_DESCRIPTION" "Kill over 9000 enemies using the Gruber Kurz handgun."
+
+"ACHIEVEMENT_3_NAME"        "This is Dota2"
+"ACHIEVEMENT_3_DESCRIPTION" "Unlock the pit cut-scene."
 ```
 And each achievement will have two images:  
-* `resource/flash3/images/achievements/0_on.png`
-* `resource/flash3/images/achievements/0_off.png`  
-where 0 is the achievement ID
+* `resource/flash3/images/achievements/1_on.png`
+* `resource/flash3/images/achievements/1_off.png`  
+where 1 is the achievement ID
 
 Each mod will have an achievement schema, that will define:
 
