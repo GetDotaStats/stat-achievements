@@ -8,6 +8,6 @@
     "2"
     {
         "File" "StatsCollectionAchievement"
-        "Depth" "1"
+        "Depth" "1337" //Needs to be high for the Achievement UI
     }
 }

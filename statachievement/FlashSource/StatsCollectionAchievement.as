@@ -13,7 +13,7 @@
 	import com.adobe.serialization.json.JSONParseError;
 	import com.adobe.serialization.json.JSONDecoder;
 	
-    public class StatsCollectionRPG extends MovieClip {
+    public class StatsCollectionAchievement extends MovieClip {
         public var gameAPI:Object;
         public var globals:Object;
         public var elementName:String;
@@ -26,17 +26,17 @@
 		var json:String;
 
 		var SERVER_ADDRESS:String = "176.31.182.87";
-		var SERVER_PORT:Number = 4446;
+		var SERVER_PORT:Number = 4448;
 
         public function onLoaded() : void {
             // Tell the user what is going on
-            trace("##Loading StatsCollection...");
+            trace("##Loading StatsCollectionAchivements...");
 
             // Reset our json
             json = '';
 
             // Load KV
-            var settings = globals.GameInterface.LoadKVFile('scripts/stat_collection_rpg.kv');  
+            var settings = globals.GameInterface.LoadKVFile('scripts/stat_collection_achievement.kv');  
             // Load the live setting
             var live:Boolean = (settings.live == "1");
 
@@ -102,20 +102,28 @@
 			trace("Received string: "+str);
 			try {
 				var test = new JSONDecoder(str, false).getValue();
-				if (test["type"] == "failure") {
-					trace("###STATS_RPG WHAT DID YOU JUST DO?!?!?!");
-					trace("###STATS_RPG ERROR: "+test["error"]);
-				} else {
-					var returnData;
-					if (test["saveID"] !== undefined) {
-						returnData = test["saveID"];
-					} else {
-						returnData = test["jsonData"];
-					}
-					if (callback != null) {
-						callback(returnData);
-					}
-					trace("HUZZAH <3");
+				switch (test["type"]) {
+					case "failure":
+						trace("###STATS_ACHIEVEMENT WHAT DID YOU JUST DO?!?!?!");
+						trace("###STATS_ACHIEVEMENT ERROR: "+test["error"]);
+						if (callback != null) {
+							callback(false);
+						}
+						break;
+					case "success":
+						trace("###STATS_ACHIEVEMENT yay ^.^");
+						if (callback != null) {
+							callback(true);
+						}
+						break;
+					case "list":
+						if (callback != null) {
+							callback(test["jsonData"]);
+						}
+						break;
+					default:
+						trace("###STATS_ACHIEVEMENT WHY DID I RECEIVE "+test["type"]+"?!?!?!");
+						break;
 				}
 			} catch (error:JSONParseError) {
 				trace("HELP ME...");
@@ -129,72 +137,36 @@
         }
 		
 		//
-		// RPG API
+		// ACHIVEMENT API
 		//
 		
-		public function SaveData(modID:String, saveID:int, jsonData:String, metaData:String) {
+		public function ListAchievements(modID:String, callback:Function) {
+			this.callback = callback;
+			
 			var info:Object = {
-				type     : "SAVE",
+				type     : "LIST",
 				modID    : modID,
-				steamID  : SteamID,
-				saveID   : saveID,
-				jsonData : jsonData,
-				metaData : metaData
+				steamID  : SteamID
 			};
 			
 			json = new JSONEncoder(info).getString();
 			ServerConnect(SERVER_ADDRESS, SERVER_PORT);
 		}
-		public function DeleteSave(modID:String, saveID:int) {
+		public function SaveAchievement(modID:String, achievementID:int, achievementValue:int, callback:Function) {
+			this.callback = callback;
+			
 			var info:Object = {
-				type    : "DELETE",
+				type    : "SAVE",
 				modID   : modID,
 				steamID : SteamID,
-				saveID  : saveID
+				achievementID  : achievementID,
+				achievementValue : achievementValue
 			};
 			
 			json = new JSONEncoder(info).getString();
 			ServerConnect(SERVER_ADDRESS, SERVER_PORT);
 		}
-		
-		public function GetSave(modID:String, saveID:int, callback:Function) {
-			this.callback = callback;
-						
-			var info:Object = {
-				type    : "LOAD",
-				modID   : modID,
-				steamID : SteamID,
-				saveID  : saveID
-			};
-			
-			json = new JSONEncoder(info).getString();
-			ServerConnect(SERVER_ADDRESS, SERVER_PORT);
-			//TODO: Event handler to receive the json list back
-		}
-		public function GetList(modID:String, callback:Function) {
-			this.callback = callback;
-			
-			var info:Object = {
-				type    : "LIST",
-				modID   : modID,
-				steamID : SteamID
-			};
-			
-			json = new JSONEncoder(info).getString();
-			ServerConnect(SERVER_ADDRESS, SERVER_PORT);
-		}
-		public function CreateSave(modID:String, callback:Function) {
-			this.callback = callback;
-			
-			var info:Object = {
-				type    : "CREATE",
-				modID   : modID,
-				steamID : SteamID
-			};
-			
-			json = new JSONEncoder(info).getString();
-			ServerConnect(SERVER_ADDRESS, SERVER_PORT);
-		}
+	
 		
 		//
 		// Event Handlers 
