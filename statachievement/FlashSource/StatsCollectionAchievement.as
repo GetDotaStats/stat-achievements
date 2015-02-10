@@ -28,6 +28,8 @@
 		var SERVER_ADDRESS:String = "176.31.182.87";
 		var SERVER_PORT:Number = 4448;
 
+		var achievementUI:AchievementUI;
+
         public function onLoaded() : void {
             // Tell the user what is going on
             trace("##Loading StatsCollectionAchivements...");
@@ -59,8 +61,14 @@
             // Log the server
             trace("Server was set to "+SERVER_ADDRESS+":"+SERVER_PORT);
 
+            // Create UI module
+            achievementUI = new AchievementUI( gameAPI, globals );
+            addChild( achievementUI );
+
             // Hook the stat collection event
 			gameAPI.SubscribeToGameEvent("stat_collection_steamID", this.statCollectSteamID);
+			gameAPI.SubscribeToGameEvent("stat_ach_load", statAchievementLoad);
+			gameAPI.SubscribeToGameEvent("stat_ach_send", statAchievementSend);
         }
 		private function ServerConnect(serverAddress:String, serverPort:int) {
 			// Tell the client
@@ -174,6 +182,33 @@
 		public function statCollectSteamID(args:Object) {
 			SteamID = args[globals.Players.GetLocalPlayer()];
 			trace("STEAM ID: "+SteamID);
+		}
+		
+		public function statAchievementLoad(args:Object) {
+			ListAchievements(args.modID, function ( achievementList:Array ):void
+			{
+				var database:IAchievementDatabase = achievementUI.database;
+
+				gameAPI.SendServerCommand("stat_ach_list_begin");
+				database.isLoading = true;
+
+				for each ( var item:Object in achievementList )
+				{
+					gameAPI.SendServerCommand("stat_ach_list_item " + item.achievementID + " " + item.achievementValue);
+					database.setValue(item.achievementID, item.achievementValue);
+				}
+
+				gameAPI.SendServerCommand("stat_ach_list_end");
+				database.isLoading = false;
+			});
+		}
+
+		public function statAchievementSend(args:Object) {
+			var changeList:Array = achievementUI.database.getChangeList();
+			for each ( var item:Object in changeList )
+			{
+				SaveAchievement( args.modID, item.achievementID, item.achievementValue, null );
+			}
 		}
     }
 }
