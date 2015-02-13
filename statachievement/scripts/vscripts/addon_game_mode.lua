@@ -1,8 +1,8 @@
 -- Load Stat collection (statcollection should be available from any script scope)
-require('lib.statcollection')
-statcollection.addStats({
-	modID = 'XXXXXXXXXXXXXXXXXXX' --GET THIS FROM http://getdotastats.com/#d2mods__my_mods
-})
+require('lib.statcollection_achievement')
+statcollection_achievement.setModID(
+	'XXXXXXXXXXXXXXXXXXX' --GET THIS FROM http://getdotastats.com/#d2mods__my_mods
+)
 
 print( "Example stat collection game mode loaded." )
 
@@ -25,10 +25,21 @@ function YourGamemode:InitGameMode()
     local GameMode = GameRules:GetGameModeEntity()
 
     -- Register Think
-    GameMode:SetContextThink( "YourGamemode:Think_LoadAchievements", function() return self:GameThink() end, 0.25 )
-    GameMode:SetContextThink( "YourGamemode:Think_SendAchievements", function() return self:GameThink() end, 0.25 )
+    GameMode:SetContextThink( "YourGamemode:Think_LoadAchievements", function() return self:Think_LoadAchievements() end, 0.25 )
+    GameMode:SetContextThink( "YourGamemode:Think_SendAchievements", function() return self:Think_SendAchievements() end, 0.25 )
 
     -- Register Game Events
+    ListenToGameEvent( "npc_spawned", function ( event )
+         -- Apply tracking modifier for achievements to hero
+        local unit = EntIndexToHScript( event.entindex )
+
+        if not unit:IsRealHero()    then return end
+        if unit:GetPlayerID() < 0   then return end
+
+        local achievementItem = CreateItem( "item_achievements", nil, nil )
+        achievementItem:ApplyDataDrivenModifier( unit, unit, "modifier_achievement_tracker", {} )
+
+    end, nil )
 end
 
 --------------------------------------------------------------------------------

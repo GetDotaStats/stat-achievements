@@ -17,19 +17,10 @@ statcollection.addStats({
 module('statcollection_achievement', package.seeall)
 
 -- Require libs
-require( "AchievementManager" )
+require( "lib.AchievementManager" )
 
 -- modID
 local modID = nil
-
-
--- This is for Flash to know its steamID
-j = {}
-for i=0,9 do
-	j[tostring(i)] = PlayerResource:GetSteamAccountID(i)
-end
-FireGameEvent("stat_collection_steamID", j)
-
 
 -- Set mod ID
 function setModID( _modID )
@@ -44,6 +35,13 @@ function loadAchievements()
 		print('ERROR: Please call statcollection_achievement.setModID()!')
 		return
 	end
+
+	-- This is for Flash to know its steamID
+	j = {}
+	for i=0,9 do
+		j[tostring(i)] = PlayerResource:GetSteamAccountID(i)
+	end
+	FireGameEvent("stat_collection_steamID", j)
 
 	-- Tell the user the achievements are being loaded
 	print('Loading achievements...')
@@ -70,4 +68,20 @@ function sendAchievements()
 	FireGameEvent("stat_ach_send", {
 		modID = modID
 	} )
+end
+
+
+-- Earn an achievement and update the UI immediately
+function earnAchievement( unit, achievementID )
+	AchievementManager:EarnAchievement( unit, achievementID )
+end
+
+-- Add achievement value
+function addAchievementValue( unit, achievementID, valueToAdd )
+	AchievementManager:AddValue( unit, achievementID, valueToAdd )
+end
+
+-- Set achievement value
+function setAchievementValue( unit, achievementID, value )
+	AchievementManager:SetValue( unit, achievementID, value )
 end

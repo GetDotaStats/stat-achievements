@@ -1,5 +1,7 @@
 ﻿package  {
 
+	import achievements.AchievementUI;
+	import achievements.IAchievementDatabase;
 	import flash.display.MovieClip;
 	import flash.net.Socket;
     import flash.utils.ByteArray;
@@ -8,6 +10,7 @@
     import flash.events.IOErrorEvent;
     import flash.utils.Timer;
     import flash.events.TimerEvent;
+	import ui.UIManager;
 	
 	import com.adobe.serialization.json.JSONEncoder;
 	import com.adobe.serialization.json.JSONParseError;
@@ -29,6 +32,20 @@
 		var SERVER_PORT:Number = 4448;
 
 		var achievementUI:AchievementUI;
+		
+		public function StatsCollectionAchievement()
+		{
+			if (stage) init();
+			else addEventListener(Event.ADDED_TO_STAGE, init);
+		}
+		
+		private function init(e:Event = null):void 
+		{
+			// Create UI module
+			UIManager.createUIManager( stage );
+			
+            addChild( achievementUI = new AchievementUI() );
+		}
 
         public function onLoaded() : void {
             // Tell the user what is going on
@@ -61,9 +78,8 @@
             // Log the server
             trace("Server was set to "+SERVER_ADDRESS+":"+SERVER_PORT);
 
-            // Create UI module
-            achievementUI = new AchievementUI( gameAPI, globals );
-            addChild( achievementUI );
+            // Initialize UI module
+			achievementUI.onLoaded( gameAPI, globals );
 
             // Hook the stat collection event
 			gameAPI.SubscribeToGameEvent("stat_collection_steamID", this.statCollectSteamID);
