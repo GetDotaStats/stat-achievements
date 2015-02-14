@@ -23,6 +23,8 @@ package achievements
 		
 		public function OverallProgressBar() 
 		{
+			super();
+			
 			viewWidth = 283;
 			viewHeight = 12;
 			
@@ -65,19 +67,26 @@ package achievements
 			//
 			// Register event listeners
 			//
-			AchievementDatabase.instance.addEventListener( AchievementEvent.LOADED, _onChangedNumAchieved );
+			AchievementDatabase.instance.addEventListener( AchievementEvent.LOADED, _onChangedNumAchieved );		// <- What's wrong?
 			AchievementDatabase.instance.addEventListener( AchievementEvent.ACHIEVED, _onChangedNumAchieved );
 		}
 		
 		private function _onChangedNumAchieved( e:AchievementEvent ):void 
 		{
-			value = AchievementDatabase.instance.numAchievedAchievements;
-			max = AchievementDatabase.instance.numAchievements;
-			
-			// Label
-			_labelNumber.text = value + " / " + max;
-			
-			setDirty();
+			try
+			{
+				value = AchievementDatabase.instance.numAchievedAchievements;
+				max = AchievementDatabase.instance.numAchievements;
+				
+				// Label
+				_labelNumber.text = value + " / " + max;
+				
+				setDirty();
+			}
+			catch ( e:Error )
+			{
+				Utils.LogError( e );
+			}
 		}
 		
 		override public function updateLayout():void 

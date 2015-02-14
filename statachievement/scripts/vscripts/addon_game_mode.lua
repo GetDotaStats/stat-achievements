@@ -1,7 +1,7 @@
 -- Load Stat collection (statcollection should be available from any script scope)
 require('lib.statcollection_achievement')
 statcollection_achievement.setModID(
-	'XXXXXXXXXXXXXXXXXXX' --GET THIS FROM http://getdotastats.com/#d2mods__my_mods
+	'achievement_test' --GET THIS FROM http://getdotastats.com/#d2mods__my_mods
 )
 
 print( "Example stat collection game mode loaded." )
@@ -40,6 +40,11 @@ function YourGamemode:InitGameMode()
         achievementItem:ApplyDataDrivenModifier( unit, unit, "modifier_achievement_tracker", {} )
 
     end, nil )
+
+    -- Register Commands
+    Convars:RegisterCommand( "stat_ach_send", function ( _ )
+        statcollection_achievement.sendAchievements()
+    end, "", 0 )
 end
 
 --------------------------------------------------------------------------------

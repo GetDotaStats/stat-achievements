@@ -243,13 +243,14 @@ package achievements
 			swapChildren( scopeBar, _tabView );
 			
 			// Event listeners
+			Utils.Log( "AchListPanel : Registering event listeners." );
 			AchievementDatabase.instance.addEventListener( AchievementEvent.LOADED, _onLoadedAchievementDatabase );
 			AchievementDatabase.instance.addEventListener( AchievementEvent.ACHIEVED, _onAchieved );
 			
 			addEventListener( MouseEvent.MOUSE_DOWN, _onMouseDown );
 			
 			// TEST
-			AchievementDatabase.instance.dev_generateDummyAchievements();
+		//	AchievementDatabase.instance.dev_generateDummyAchievements();
 			
 			_tabView.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void
 			{
@@ -283,34 +284,44 @@ package achievements
 		
 		private function _onLoadedAchievementDatabase(e:AchievementEvent):void 
 		{
-			var groupView:IAchievementGroupView;
-			
-			// Reset
-			for each ( groupView in _allGroupViews )
+			try
 			{
-				groupView.removeAllAchievements();
-			}
-			
-			// Add all achievements loaded
-			for each ( var info:AchievementInfo in AchievementDatabase.instance.achievementAry )
-			{
-				if ( info.isAchieved )
+				Utils.Log( "AchievementListPanel#_onLoadedAchievementDatabase" );
+				
+				var groupView:IAchievementGroupView;
+				
+				// Reset
+				for each ( groupView in _allGroupViews )
 				{
-					for each ( groupView in _earnedGroupAry )
+					groupView.removeAllAchievements();
+				}
+				
+				Utils.Log( "Achievement group viees have been reset." );
+				
+				// Add all achievements loaded
+				for each ( var info:AchievementInfo in AchievementDatabase.instance.achievementAry )
+				{
+					if ( info.isAchieved )
 					{
-						groupView.addAchievement( info );
+						for each ( groupView in _earnedGroupAry )
+						{
+							groupView.addAchievement( info );
+						}
+					}
+					else
+					{
+						for each ( groupView in _availableGroupAry )
+						{
+							groupView.addAchievement( info );
+						}
 					}
 				}
-				else
-				{
-					for each ( groupView in _availableGroupAry )
-					{
-						groupView.addAchievement( info );
-					}
-				}
+				
+				Utils.Log( "Layouts of achievement views are being updated." );
+				updateTableLayouts();
+			} catch ( e:Error ) {
+				Utils.LogError( e );
 			}
-			
-			updateTableLayouts();
 		}
 		
 		private function _onAchieved(e:AchievementEvent):void 

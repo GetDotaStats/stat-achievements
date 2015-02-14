@@ -1,6 +1,7 @@
 package achievements 
 {
 	import achievements.events.AchievementEvent;
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
 	/**
@@ -10,6 +11,9 @@ package achievements
 	public class AchievementDatabase extends EventDispatcher implements IAchievementDatabase
 	{
 		static private var _instance:AchievementDatabase;
+		static private var s_lastInstanceID:int = 0;
+		
+		public var _instanceID:int;
 		
 		private var achievementsKV:Object;
 		public var achievementAry:Array = new Array();
@@ -21,7 +25,9 @@ package achievements
 		
 		public function AchievementDatabase() 
 		{
-			trace( "Creating an instance of AchievementDatabase..." );
+			_instanceID = ++s_lastInstanceID;
+			
+			Utils.Log( "Creating an instance of AchievementDatabase..." );
 		}
 		
 		static public function initialize():void
@@ -36,13 +42,17 @@ package achievements
 		
 		public function get numAchievements():uint
 		{
-			return achievementAry.length;
+			// achievementAry is a sparsed array so we can't use Array#length.
+			var count:uint = 0;
+			for ( var index:* in achievementAry ) count++;
+			return count;
 		}
 		
 		public function get numAchievedAchievements():uint
 		{
-			return achievementAry.filter( function ( item:*, index:int, array:Array ):Boolean {
-				return AchievementInfo( item ).isAchieved;
+			return achievementAry.filter( function ( ach:AchievementInfo, index:int, array:Array ):Boolean {
+				if ( !ach ) return false;
+				return ach.isAchieved;
 			} ).length;
 		}
 		
@@ -77,10 +87,14 @@ package achievements
 			
 			_changedAchievementMap.forEach( function ( ach:AchievementInfo, id:int, array:Array ):void
 			{
+				if ( !ach ) return;
+				
 				changeList.push( {
 					achievementID : id,
 					achievementValue : ach.currentValue
 				} );
+				
+				Utils.Log( "Pushed an achievement to change list." );
 			} );
 			
 			if ( bClearChangeList )
@@ -109,6 +123,7 @@ package achievements
 			_api = api;
 			
 			achievementAry = new Array();
+			_changedAchievementMap = new Array();
 			
 			// Load KV file
 			achievementsKV = api.LoadKVFile( "scripts/achievements.kv" );
@@ -132,7 +147,9 @@ package achievements
 				info.addEventListener( AchievementEvent.ACHIEVED, _onAchievementAchieved );
 			}
 			
+			Utils.Log( "InstanceID = " + _instanceID );
 			dispatchEvent( new AchievementEvent( AchievementEvent.LOADED ) );
+			Utils.Log( "Achievement Loaded Fired" );
 			
 			// Register game event listener
 			api.SubscribeToGameEvent( "stat_ach_update_value", _onUpdateValue );
@@ -144,7 +161,7 @@ package achievements
 			if ( isLoading ) return;
 			
 			// Push to the change list
-			_changedAchievementMap[e.info.id] = true;
+			_changedAchievementMap[e.info.id] = e.info;
 		}
 		
 		private function _onAchievementAchieved( e:AchievementEvent ):void 

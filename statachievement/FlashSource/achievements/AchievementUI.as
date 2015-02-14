@@ -1,6 +1,9 @@
 package achievements 
 {
+	import achievements.events.AchievementEvent;
 	import flash.display.Sprite;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	
 	/**
 	 * ...
@@ -26,12 +29,16 @@ package achievements
 			addChild( _achievementPopupManager = new AchievementPopupManager() );
 			addChild( _achievementToggleButton = new AchievementToggleButton( _achievementListPanel ) );
 		//	addChild( _achievementDebugButtonsPanel = new AchievementDebugButtonsPanel() );
+		
+			Utils.Log( "Initialized AchievementUI" );
 		}
 		
 		public function onLoaded( $gameAPI:Object, $globals:Object ):void
 		{
 			gameAPI = $gameAPI;
 			globals = $globals;
+			
+			Utils.Log( "AchievementUI#onLoaded" );
 			
 			AchievementDatabase.instance.onLoaded( this );
 			

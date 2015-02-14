@@ -79,14 +79,16 @@ package achievements
 			return array[index];
 		}
 		
-		private function _isAvailable( item:*, index:int, array:Array ):Boolean
+		private function _isAvailable( ach:AchievementInfo, index:int, array:Array ):Boolean
 		{
-			return !AchievementInfo( item ).isAchieved;
+			if ( !ach ) return false;
+			return !ach.isAchieved;
 		}
 		
-		private function _hasProgressBar( item:*, index:int, array:Array ):Boolean
+		private function _hasProgressBar( ach:AchievementInfo, index:int, array:Array ):Boolean
 		{
-			return AchievementInfo( item ).hasProgressBar;
+			if ( !ach ) return false;
+			return ach.hasProgressBar;
 		}
 		
 	}

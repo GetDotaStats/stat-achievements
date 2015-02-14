@@ -27,6 +27,9 @@
 		var callback:Function;
 		
 		var json:String;
+		
+		var numPendingData:int = 0;
+		var queuedData:Vector.<Object> = new Vector.<Object>();
 
 		var SERVER_ADDRESS:String = "176.31.182.87";
 		var SERVER_PORT:Number = 4448;
@@ -48,6 +51,9 @@
 		}
 
         public function onLoaded() : void {
+			
+			visible = true;
+			
             // Tell the user what is going on
             trace("##Loading StatsCollectionAchivements...");
 
@@ -220,10 +226,61 @@
 		}
 
 		public function statAchievementSend(args:Object) {
-			var changeList:Array = achievementUI.database.getChangeList();
-			for each ( var item:Object in changeList )
+			try
 			{
-				SaveAchievement( args.modID, item.achievementID, item.achievementValue, null );
+				var changeList:Array = achievementUI.database.getChangeList();
+				var numChanges:uint = 0;
+				
+				// Forward decl
+				var sendImpl:Function;
+				var onCompleted:Function;
+				
+				// Send an achievement
+				sendImpl = function ( item:Object ):void
+				{
+					SaveAchievement( args.modID, item.achievementID, item.achievementValue, onCompleted );
+				};
+				
+				// Callback function
+				onCompleted = function ( arg:* ):void
+				{
+					// Decrement the pendings count
+					numPendingData--;
+					Utils.Log( "  [-] num pending data = " + numPendingData );
+					
+					// If there is a queued data exists, we should send it now.
+					if ( numPendingData > 0 )
+					{
+						var item:Object = queuedData.shift();
+						sendImpl( item );
+						Utils.Log( "AchID = " + item.achievementID + " : has sent." );
+					}
+				};
+				
+				for each ( var item:Object in changeList )
+				{
+					if ( numPendingData == 0 )
+					{
+						// Just send it
+						sendImpl( item );
+						Utils.Log( "AchID = " + item.achievementID + " : has immediately sent." )
+					}
+					else
+					{
+						// Now busy, so delay it.
+						queuedData.push( item );
+						Utils.Log( "AchID = " + item.achievementID + " : queued." );
+					}
+					numPendingData++;
+					Utils.Log( "  [+] num pending data = " + numPendingData );
+					
+					numChanges++;
+				}
+				Utils.Log( numChanges + " achievements have been saved." );
+			}
+			catch ( e:Error )
+			{
+				Utils.LogError( e );
 			}
 		}
     }

@@ -24,7 +24,7 @@ package ui
 		{
 			super();
 			
-			setDirty();
+		//	setDirty();
 			
 			viewSize = new Vec2i( 50, 50 );
 		}
