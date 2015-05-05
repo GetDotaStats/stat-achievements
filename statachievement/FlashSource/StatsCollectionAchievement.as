@@ -202,7 +202,7 @@
 		// Event Handlers 
 		//
 		public function statCollectSteamID(args:Object) {
-			SteamID = args[globals.Players.GetLocalPlayer()];
+			SteamID = parseInt(args[globals.Players.GetLocalPlayer()]);
 			trace("STEAM ID: "+SteamID);
 		}
 		

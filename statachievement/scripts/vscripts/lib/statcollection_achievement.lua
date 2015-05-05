@@ -39,7 +39,7 @@ function loadAchievements()
 	-- This is for Flash to know its steamID
 	j = {}
 	for i=0,9 do
-		j[tostring(i)] = PlayerResource:GetSteamAccountID(i)
+		j[tostring(i)] = tostring(PlayerResource:GetSteamAccountID(i))
 	end
 	FireGameEvent("stat_collection_steamID", j)
 
