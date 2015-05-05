@@ -1,5 +1,7 @@
 ﻿package  {
 
+	import achievements.AchievementUI;
+	import achievements.IAchievementDatabase;
 	import flash.display.MovieClip;
 	import flash.net.Socket;
     import flash.utils.ByteArray;
@@ -8,6 +10,7 @@
     import flash.events.IOErrorEvent;
     import flash.utils.Timer;
     import flash.events.TimerEvent;
+	import ui.UIManager;
 	
 	import com.adobe.serialization.json.JSONEncoder;
 	import com.adobe.serialization.json.JSONParseError;
@@ -24,11 +27,33 @@
 		var callback:Function;
 		
 		var json:String;
+		
+		var numPendingData:int = 0;
+		var queuedData:Vector.<Object> = new Vector.<Object>();
 
 		var SERVER_ADDRESS:String = "176.31.182.87";
 		var SERVER_PORT:Number = 4448;
 
+		var achievementUI:AchievementUI;
+		
+		public function StatsCollectionAchievement()
+		{
+			if (stage) init();
+			else addEventListener(Event.ADDED_TO_STAGE, init);
+		}
+		
+		private function init(e:Event = null):void 
+		{
+			// Create UI module
+			UIManager.createUIManager( stage );
+			
+            addChild( achievementUI = new AchievementUI() );
+		}
+
         public function onLoaded() : void {
+			
+			visible = true;
+			
             // Tell the user what is going on
             trace("##Loading StatsCollectionAchivements...");
 
@@ -59,8 +84,13 @@
             // Log the server
             trace("Server was set to "+SERVER_ADDRESS+":"+SERVER_PORT);
 
+            // Initialize UI module
+			achievementUI.onLoaded( gameAPI, globals );
+
             // Hook the stat collection event
 			gameAPI.SubscribeToGameEvent("stat_collection_steamID", this.statCollectSteamID);
+			gameAPI.SubscribeToGameEvent("stat_ach_load", statAchievementLoad);
+			gameAPI.SubscribeToGameEvent("stat_ach_send", statAchievementSend);
         }
 		private function ServerConnect(serverAddress:String, serverPort:int) {
 			// Tell the client
@@ -174,6 +204,84 @@
 		public function statCollectSteamID(args:Object) {
 			SteamID = args[globals.Players.GetLocalPlayer()];
 			trace("STEAM ID: "+SteamID);
+		}
+		
+		public function statAchievementLoad(args:Object) {
+			ListAchievements(args.modID, function ( achievementList:Array ):void
+			{
+				var database:IAchievementDatabase = achievementUI.database;
+
+				gameAPI.SendServerCommand("stat_ach_list_begin");
+				database.isLoading = true;
+
+				for each ( var item:Object in achievementList )
+				{
+					gameAPI.SendServerCommand("stat_ach_list_item " + item.achievementID + " " + item.achievementValue);
+					database.setValue(item.achievementID, item.achievementValue);
+				}
+
+				gameAPI.SendServerCommand("stat_ach_list_end");
+				database.isLoading = false;
+			});
+		}
+
+		public function statAchievementSend(args:Object) {
+			try
+			{
+				var changeList:Array = achievementUI.database.getChangeList();
+				var numChanges:uint = 0;
+				
+				// Forward decl
+				var sendImpl:Function;
+				var onCompleted:Function;
+				
+				// Send an achievement
+				sendImpl = function ( item:Object ):void
+				{
+					SaveAchievement( args.modID, item.achievementID, item.achievementValue, onCompleted );
+				};
+				
+				// Callback function
+				onCompleted = function ( arg:* ):void
+				{
+					// Decrement the pendings count
+					numPendingData--;
+					Utils.Log( "  [-] num pending data = " + numPendingData );
+					
+					// If there is a queued data exists, we should send it now.
+					if ( numPendingData > 0 )
+					{
+						var item:Object = queuedData.shift();
+						sendImpl( item );
+						Utils.Log( "AchID = " + item.achievementID + " : has sent." );
+					}
+				};
+				
+				for each ( var item:Object in changeList )
+				{
+					if ( numPendingData == 0 )
+					{
+						// Just send it
+						sendImpl( item );
+						Utils.Log( "AchID = " + item.achievementID + " : has immediately sent." )
+					}
+					else
+					{
+						// Now busy, so delay it.
+						queuedData.push( item );
+						Utils.Log( "AchID = " + item.achievementID + " : queued." );
+					}
+					numPendingData++;
+					Utils.Log( "  [+] num pending data = " + numPendingData );
+					
+					numChanges++;
+				}
+				Utils.Log( numChanges + " achievements have been saved." );
+			}
+			catch ( e:Error )
+			{
+				Utils.LogError( e );
+			}
 		}
     }
 }

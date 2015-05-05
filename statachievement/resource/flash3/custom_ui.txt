@@ -1,11 +1,12 @@
 "CustomUI"
 {
-    "1"
-    {
-        "File"      "XXXXXXX" //YOUR MAIN UI ELEMENT(s) AS REQUIRED
-        "Depth"     "253"
-    }
-    "2"
+    //"1"
+    //{
+    //    "File"      "XXXXXXX" //YOUR MAIN UI ELEMENT(s) AS REQUIRED
+    //    "Depth"     "253"
+    //}
+    //"2"
+	"1"
     {
         "File" "StatsCollectionAchievement"
         "Depth" "1337" //Needs to be high for the Achievement UI

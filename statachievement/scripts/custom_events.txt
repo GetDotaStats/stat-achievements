@@ -36,5 +36,22 @@
         "9"             "long"
     }
 
-    // End Stat Collection
+	"stat_ach_load"
+	{
+		"modID"			"string"
+	}
+	
+	"stat_ach_send"
+	{
+		"modID"			"string"
+	}
+	
+	"stat_ach_update_value"
+	{
+		"playerID"		"short"
+		"achievementID" "long"
+		"value"			"long"
+	}
+	
+	 // End Stat Collection
 }

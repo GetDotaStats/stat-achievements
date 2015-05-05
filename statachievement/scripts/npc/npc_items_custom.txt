@@ -1,0 +1,97 @@
+"DOTAAbilities"
+{
+	"item_achievements"
+	{
+		// General
+		//-------------------------------------------------------------------------------------------------------------
+		"BaseClass"		"item_datadriven"
+		"ItemBaseLevel"	"1"
+		
+		"Modifiers"
+		{
+			"modifier_achievement_tracker"
+			{
+				"Passive"	"1"
+				"IsHidden"	"1"
+				
+				"Attributes"	"MODIFIER_ATTRIBUTE_PERMANENT"
+				
+				"OnDealDamage"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"Achievement_ModifierEventListeners.lua"
+						"Function"		"OnDealDamage"
+						"attack_damage"	"%attack_damage"
+					}
+				}
+				
+				"OnTakeDamage"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"Achievement_ModifierEventListeners.lua"
+						"Function"		"OnTakeDamage"
+						"attack_damage"	"%attack_damage"
+					}
+				}
+				
+				"OnAttackLanded"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"Achievement_ModifierEventListeners.lua"
+						"Function"		"OnAttackLanded"
+						"attack_damage"	"%attack_damage"
+					}
+				}
+				
+				"OnKill"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"Achievement_ModifierEventListeners.lua"
+						"Function"		"OnKill"
+					}
+				}
+				
+				"OnManaGained"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"Achievement_ModifierEventListeners.lua"
+						"Function"		"OnManaGained"
+					}
+				}
+				
+				"OnSpentMana"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"Achievement_ModifierEventListeners.lua"
+						"Function"		"OnSpentMana"
+					}
+				}
+				
+				"OnUnitMoved"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"Achievement_ModifierEventListeners.lua"
+						"Function"		"OnUnitMoved"
+					}
+				}
+				
+				"ThinkInterval"		"0.03"
+				"OnIntervalThink"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"Achievement_ModifierEventListeners.lua"
+						"Function"		"OnIntervalThink"
+					}
+				}
+			}
+		}
+	}
+}
