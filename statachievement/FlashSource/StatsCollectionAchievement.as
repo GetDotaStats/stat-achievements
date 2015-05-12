@@ -202,8 +202,11 @@
 		// Event Handlers 
 		//
 		public function statCollectSteamID(args:Object) {
-			SteamID = args[globals.Players.GetLocalPlayer()];
-			trace("STEAM ID: "+SteamID);
+			var splitMsg:Array = args.ids.split(",");
+            this.SteamID = Number(splitMsg[this.globals.Players.GetLocalPlayer()]);
+            //this.UserName = this.globals.Players.GetPlayerName(this.globals.Players.GetLocalPlayer());
+            trace("STEAM ID: " + this.SteamID);
+            //trace("USERNAME: " + this.UserName);
 		}
 		
 		public function statAchievementLoad(args:Object) {
